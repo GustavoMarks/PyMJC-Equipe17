@@ -1,63 +1,62 @@
-# 1º Relatóio: Etapa AI-a (Analisador Léxico e Sintático)
-
 1. Qual é o nome do relator?
 
-    > Escreva sua resposta aqui
+    > Gustavo Santos Marques de Freitas
 
 2. A etapa foi completamente ou parcialmente concluída?
 
-    > Escreva sua resposta aqui
+    > Parcialmente concluída
 
 3. No caso de parcialmente concluída, o que não foi concluído?
 
-    > Escreva sua resposta aqui
+    > Testagem e correção de erros
 
 4. O programa passa nos testes automatizados?
     
-    > Escreva sua resposta aqui
+    > Não, os testes são abortados (mensagem "Morto") após alguns segundos
 
 5. Algum erro de execução foi encontrado para alguma das entradas? Quais?
     
-    > Escreva sua resposta aqui
+    > Nenhuma entrada pode ter executada
 
 6. Quais as dificuldades encontradas para realização da etapa do projeto?
     
-    > Escreva sua resposta aqui
+    > Execução de testes; domínio da linguagem Python e das bibliotecas do ambiente, em especial para construção do Parser; domínio das regras para Expressão Regular
 
 7. Qual a participação de cada membro da equipe na etapa de execução?
     
-    > Escreva sua resposta aqui
+    > Feito individualmente
 
 
 # 2º Relatóio: Etapa AI-b (Árvores Sintática Abstrata e Análise Semântica)
 
 1. Qual é o nome do relator?
 
-    > Escreva sua resposta aqui
+    > Gustavo Santos Marques de Freitas
 
 2. A etapa foi completamente ou parcialmente concluída?
 
-    > Escreva sua resposta aqui
+    > Parcialmente concluída
 
 3. No caso de parcialmente concluída, o que não foi concluído?
 
-    > Escreva sua resposta aqui
+    > Execução de testes
 
 4. O programa passa nos testes automatizados?
     
-    > Escreva sua resposta aqui
+    > Não foi possível executar os testes automatizados no ambiente
 
 5. Algum erro de execução foi encontrado para alguma das entradas? Quais?
     
-    > Escreva sua resposta aqui
+    > Na execução dos testes com poetry, retorna o erro "ModuleNotFoundError: No module named 'sly'"
+		> Na execução dos testes apenas com python, retorna o erro "RecursionError: maximum recursion depth exceeded"
 
 6. Quais as dificuldades encontradas para realização da etapa do projeto?
     
-    > Escreva sua resposta aqui
+    > Gerenciamento de tempo, entendimento de POO em python, complexidade e quantidade de classes e métodos.
 
 7. Qual a participação de cada membro da equipe na etapa de execução?
     
-    > Escreva sua resposta aqui
+    > Trabalho feito individualmente.
 
 
 # 3º Relatóio: Etapa AI-c (Tradução para o Código Intermediário)
