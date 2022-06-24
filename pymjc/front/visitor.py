@@ -1615,9 +1615,11 @@ class TranslateVisitor(IRVisitor):
         self.var_access = {}
         return None
 
-    @abstractmethod
+
     def visit_formal(self, element: Formal) -> translate.Exp:
-        pass
+        element.name_id.accept_ir(self)
+        element.type.accept_ir(self)
+        return None
 
     @abstractmethod
     def visit_int_array_type(self, element: IntArrayType) -> translate.Exp:
@@ -1714,17 +1716,17 @@ class TranslateVisitor(IRVisitor):
     def visit_call(self, element: Call) -> translate.Exp:
         pass
 
-    @abstractmethod
     def visit_integer_literal(self, element: IntegerLiteral) -> translate.Exp:
-        pass
+        return translate.Exp(tree.CONST(element.value))
+				
 
-    @abstractmethod
     def visit_true_exp(self, element: TrueExp) -> translate.Exp:
-        pass
+        return translate.Exp(tree.CONST(1))
 
-    @abstractmethod
+
     def visit_false_exp(self, element: FalseExp) -> translate.Exp:
-        pass
+        return translate.Exp(tree.CONST(0))
+
 
     @abstractmethod
     def visit_identifier_exp(self, element: IdentifierExp) -> translate.Exp:
@@ -1743,10 +1745,12 @@ class TranslateVisitor(IRVisitor):
         pass
 
 
-    @abstractmethod
     def visit_not(self, element: Not) -> translate.Exp:
-        pass
+      exp: translate.Exp = element.negated_exp.accept_ir(self).un_ex()
+      op = tree.BINOP.XOR
+      return translate.Exp(tree.BINOP(op, tree.CONST(1), exp))
 
     @abstractmethod
     def visit_identifier(self, element: Identifier) -> translate.Exp:
+				#???
         pass
