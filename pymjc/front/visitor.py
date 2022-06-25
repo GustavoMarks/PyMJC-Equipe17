@@ -2,7 +2,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 import enum
 from typing import List
-from pymjc.back.assem import MOVE
+from pymjc.back.assem import LABEL, MOVE
 
 from pymjc.front.ast import *
 from pymjc.front.frame import Frame
@@ -1637,17 +1637,60 @@ class TranslateVisitor(IRVisitor):
     def visit_identifier_type(self, element: IdentifierType) -> translate.Exp:
         pass
 
-    @abstractmethod
-    def visit_block(self, element: Block) -> translate.Exp:
-        pass
 
-    @abstractmethod
+    def visit_block(self, element: Block) -> translate.Exp:
+        if element.statement_list.size() > 0:
+            last_stm_exp: tree.Stm = element.statement_list.element_at(0).accept_ir(self).un_ex()
+            for i in range(element.statement_list.size() - 1):
+                next_stm_exp: tree.Stm = element.statement_list.element_at(i + 1).accept_ir(self).un_ex()
+                last_stm_exp = tree.SEQ(last_stm_exp, next_stm_exp)
+
+            return translate.Exp(tree.ESEQ(last_stm_exp, tree.CONST(0)))
+        return None
+
+
     def visit_if(self, element: If) -> translate.Exp:
-        pass
+        condition_exp: translate.Exp = element.condition_exp.accept_ir(self).un_ex()
+        if_stm: translate.Exp = element.if_statement.accept_ir(self).un_ex()
+        else_stm: translate.Exp = element.else_statement.accept_ir(self).un_ex()
+
+        t_label = tree.Label()
+        f_label = tree.Label()
+        join_label = tree.Label()
+
+        eq_op = tree.CJUMP.EQ
+        condition: tree.CJUMP = tree.CJUMP(eq_op, condition_exp, tree.CONST(1), t_label, f_label)
+        if_then_else: tree.SEQ = tree.SEQ(
+          condition, tree.SEQ(
+            tree.LABEL(t_label), tree.SEQ(
+              if_stm, tree.SEQ(
+                tree.LABEL(f_label), tree.SEQ(
+                  else_stm, tree.LABEL(join_label)
+                )))))
+
+        return translate.Exp(tree.ESEQ( if_then_else, tree.CONST(0)))
+
   
-    @abstractmethod
     def visit_while(self, element: While) -> translate.Exp:
-        pass
+        condition_exp: translate.Exp = element.condition_exp.accept_ir(self).un_ex()
+        stm_exp: translate.Exp = element.statement.accept_ir(self).un_ex()
+
+        next_step_label = tree.LABEL()
+        loop_label = tree.Label()
+        exit_label = tree.Label()
+
+        eq_op = tree.CJUMP.EQ
+        condition: tree.CJUMP = tree.CJUMP(eq_op, condition_exp, tree.CONST(1), loop_label, exit_label)
+
+        return translate.Exp(tree.ESEQ(
+          tree.SEQ(
+            tree.LABEL(next_step_label), tree.SEQ(
+              condition, tree.SEQ(
+                tree.LABEL(loop_label), tree.SEQ(
+                  stm_exp, tree.SEQ(
+                    tree.JUMP(next_step_label), tree.LABEL(exit_label)
+                  ))))), tree.CONST(0)))
+
 
     @abstractmethod
     def visit_print(self, element: Print) -> translate.Exp:
@@ -1718,7 +1761,7 @@ class TranslateVisitor(IRVisitor):
 
     def visit_integer_literal(self, element: IntegerLiteral) -> translate.Exp:
         return translate.Exp(tree.CONST(element.value))
-				
+        
 
     def visit_true_exp(self, element: TrueExp) -> translate.Exp:
         return translate.Exp(tree.CONST(1))
@@ -1752,5 +1795,5 @@ class TranslateVisitor(IRVisitor):
 
     @abstractmethod
     def visit_identifier(self, element: Identifier) -> translate.Exp:
-				#???
+        #???
         pass
