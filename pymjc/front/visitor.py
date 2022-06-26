@@ -1,7 +1,10 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 import enum
+from subprocess import call
 from typing import List
+
+from numpy import array
 from pymjc.back.assem import LABEL, MOVE
 
 from pymjc.front.ast import *
@@ -1621,21 +1624,25 @@ class TranslateVisitor(IRVisitor):
         element.type.accept_ir(self)
         return None
 
-    @abstractmethod
+
     def visit_int_array_type(self, element: IntArrayType) -> translate.Exp:
-        pass
+        # ???
+        return None
 
-    @abstractmethod
+
     def visit_boolean_type(self, element: BooleanType) -> translate.Exp:
-        pass
+        # ???
+        return None
 
-    @abstractmethod
+
     def visit_integer_type(self, element: IntegerType) -> translate.Exp:
-        pass
+        # ???
+        return None
 
-    @abstractmethod
+
     def visit_identifier_type(self, element: IdentifierType) -> translate.Exp:
-        pass
+        # ???
+        return None
 
 
     def visit_block(self, element: Block) -> translate.Exp:
@@ -1668,7 +1675,7 @@ class TranslateVisitor(IRVisitor):
                   else_stm, tree.LABEL(join_label)
                 )))))
 
-        return translate.Exp(tree.ESEQ( if_then_else, tree.CONST(0)))
+        return translate.Exp(tree.ESEQ(if_then_else, tree.CONST(0)))
 
   
     def visit_while(self, element: While) -> translate.Exp:
@@ -1692,9 +1699,13 @@ class TranslateVisitor(IRVisitor):
                   ))))), tree.CONST(0)))
 
 
-    @abstractmethod
     def visit_print(self, element: Print) -> translate.Exp:
-        pass
+        print_exp = element.print_exp.accept_ir(self).un_ex()
+        args = List[tree.EXP]
+        args.append(print_exp)
+
+        return translate.Exp(self.current_frame.external_call('print', args))
+
 
     def visit_assign(self, element: Assign) -> translate.Exp:
         var: translate.Exp = element.left_side_id.accept_ir(self)
@@ -1703,9 +1714,22 @@ class TranslateVisitor(IRVisitor):
 
         return translate.Exp(tree.ESEQ(assign, tree.CONST(0))) 
 
-    @abstractmethod
+
     def visit_array_assign(self, element: ArrayAssign) -> translate.Exp:
-        pass
+        # Utilizar MEM(+(MOVE(e), BINOP(MUL, i, COST W)))
+        array_id = element.array_name_id.accept_ir(self).un_ex()
+        assing_exp = element.array_exp.accept_ir(self).un_ex()
+        r_side_exp = element.right_side_exp.accept_ir(self).un_ex()
+
+        w_size = tree.CONST(Frame.word_size())
+        mul_op = tree.BINOP.MUL
+        plus_op = tree.BINOP.PLUS
+
+        target_index = tree.MEM(tree.BINOP(plus_op, tree.MEM(array_id), tree.BINOP(mul_op, assing_exp, w_size)))
+        assing_stm = tree.MOVE(target_index, r_side_exp)
+
+        return translate.Exp(tree.ESEQ(assing_stm, tree.CONST(0)))
+
 
     def visit_and(self, element: And) -> translate.Exp:
         l_side = element.left_side_exp.accept_ir(self).un_ex()
@@ -1747,27 +1771,67 @@ class TranslateVisitor(IRVisitor):
         return translate.Exp(tree.BINOP(op, l_side, r_side))
 
 
-    @abstractmethod
     def visit_array_lookup(self, element: ArrayLookup) -> translate.Exp:
-        pass
+        # Utilizar MEM(+(MOVE(e), BINOP(MUL, i, COST W)))
+        array_id = element.out_side_exp.accept_ir(self).un_ex()
+        index_exp = element.in_side_exp.accept_ir(self).un_ex()
 
-    @abstractmethod
+        w_size = tree.CONST(Frame.word_size())
+        mul_op = tree.BINOP.MUL
+        plus_op = tree.BINOP.PLUS
+
+        target_index = tree.MEM(tree.BINOP(plus_op, tree.MEM(array_id), tree.BINOP(mul_op, index_exp, w_size)))
+        return translate.Exp(target_index)
+
+
     def visit_array_length(self, element: ArrayLength) -> translate.Exp:
-        pass
+        # ??? array.length
+        array_id = element.length_exp.accept_ir(self).un_ex()
+        args = List[tree.EXP]
+        args.append(array_id)
 
-    @abstractmethod
+        return translate.Exp(self.current_frame.external_call('length', args))
+
+
     def visit_call(self, element: Call) -> translate.Exp:
-        pass
+        # obj.method(params) || this.method(params) || new object().method(params)
+        callee_exp = element.callee_exp.accept_ir(self).un_ex()
+        args = tree.ExpList(callee_exp)
+
+        for index in range(element.arg_list.size()):
+            args.add_tail(element.arg_list.element_at(index).accept_ir(self).un_ex())
+        
+        caller = element.callee_exp
+        m_name = element.callee_name_id.name
+        c_name = ""
+
+        if isinstance(caller, This):
+            c_name = self.symbol_table.curr_class_name
+        elif isinstance(caller, NewObject):
+            caller: NewObject = element.callee_exp
+            c_name = caller.object_name_id.name
+        else:
+            caller: Identifier = element.callee_exp
+            caller_name = caller.name
+            c_name = self.symbol_table.curr_method.get_local_by_name(caller_name).name
+
+
+        func = tree.NAME(c_name + "$" + m_name)
+        return translate.Exp(tree.CALL(func, args))
+
 
     def visit_integer_literal(self, element: IntegerLiteral) -> translate.Exp:
+        # ???
         return translate.Exp(tree.CONST(element.value))
         
 
     def visit_true_exp(self, element: TrueExp) -> translate.Exp:
+        # ???
         return translate.Exp(tree.CONST(1))
 
 
     def visit_false_exp(self, element: FalseExp) -> translate.Exp:
+        # ???
         return translate.Exp(tree.CONST(0))
 
 
