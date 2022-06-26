@@ -1785,12 +1785,10 @@ class TranslateVisitor(IRVisitor):
 
 
     def visit_array_length(self, element: ArrayLength) -> translate.Exp:
-        # ??? array.length
-        array_id = element.length_exp.accept_ir(self).un_ex()
-        args = List[tree.EXP]
-        args.append(array_id)
+        lenth_exp = element.length_exp.accept_ir(self).un_ex()
 
-        return translate.Exp(self.current_frame.external_call('length', args))
+        # Primeira posição do endereço do array contem tamanho
+        return translate.Exp(tree.MEM(lenth_exp))
 
 
     def visit_call(self, element: Call) -> translate.Exp:
@@ -1843,9 +1841,21 @@ class TranslateVisitor(IRVisitor):
     def visit_this(self, element: This) -> translate.Exp:
         pass
 
-    @abstractmethod
+
     def visit_new_array(self, element: NewArray) -> translate.Exp:
-        pass
+        new_exp = element.new_exp.accept_ir(self).un_ex()
+
+        mul_op = tree.BINOP.MUL
+        plus_op = tree.BINOP.PLUS
+        int_size = self.current_frame.word_size()
+
+        alloc_size = tree.BINOP(mul_op, tree.BINOP(plus_op, new_exp, tree.CONST(1)), int_size)
+
+        args = List[tree.EXP]
+        args.append(alloc_size)
+
+        return translate.Exp(self.current_frame.external_call('malloc', args))
+
 
     @abstractmethod
     def visit_new_object(self, element: NewObject) -> translate.Exp:
