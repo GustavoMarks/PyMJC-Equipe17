@@ -1,10 +1,8 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 import enum
-from subprocess import call
 from typing import List
 
-from numpy import array
 from pymjc.back.assem import LABEL, MOVE
 
 from pymjc.front.ast import *
