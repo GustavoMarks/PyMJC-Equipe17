@@ -155,10 +155,65 @@ class Liveness (InterferenceGraph):
 
     def build_in_and_out(self):
         #TODO
+        # for each n
+        #     in[n] ← {}; out[n] ← {}
+        # repeat
+        #     for each n
+        #         in'[n] ← in[n]; out'[n] ← out[n]
+        #         in[n] ← use[n] ∪ (out[n] − def[n])
+        #         out[n] ← Us∈succ[n] in[s]
+        # until in[n] = in[n] and out[n] = out[n] for all n
+
+        node_list: graph.NodeList = self.flowgraph.mynodes
+
+        while node_list.head != None:
+            self.in_node_table[node_list.head.to_string()] = {}
+            self.out_node_table[node_list.head.to_string()] = {}
+            node_list = node_list.tail
+
+        in_node_table__ = {}
+        out_node_table__ = {}
+       
+        while True:
+            node_list: graph.NodeList = self.nodes()
+            while node_list != None:
+                in_n: Set = self.in_node_table.get(node_list.head)
+                out_n: Set = self.out(node_list.head)
+
+                in_node_table__[node_list.head.to_string()] = in_n
+                out_node_table__[node_list.head.to_string()] = out_n
+
+                use_n: Set = self.flowgraph.use(node_list.head)
+                def_n: Set = self.flowgraph.deff(node_list.head)
+
+                union_in_set = use_n.union(out_n.difference(def_n))
+                self.in_node_table[node_list.head.to_string()] = union_in_set
+
+                succ: Set = node_list.head.succ()
+                for s in succ:
+                    out_n.union(s)
+
+                self.out_node_table[node_list.head.to_string()] = out_n
+
+                node_list = node_list.tail
+          
+            if in_node_table__.values() == self.in_node_table.values() and out_node_table__.values() == self.out_node_table.values():
+              break
+
         pass
 
     def build_interference_graph(self):
         #TODO
+        node_list: graph.NodeList = self.flowgraph.mynodes
+
+        while node_list != None:
+            if self.flowgraph.is_move(node_list.head):
+                self.move_handler(node_list.head)
+            else:
+                self.node_handler(node_list.head)
+            
+            node_list = node_list.tail
+            
         pass
 
 class Edge():
