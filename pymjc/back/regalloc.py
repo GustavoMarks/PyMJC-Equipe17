@@ -12,6 +12,121 @@ class RegAlloc (temp.TempMap):
         self.instrs: assem.InstrList = instr_list
         #TODO
 
+        while True:
+            
+            self.liveness_analysis()
+
+            # Java Init: 
+            # Nós gerais
+            self.pre_colored_nodes = []
+            self.normal_colored_nodes = {}
+            # Nós separados por etapas
+            self.initial_nodes = []
+            self.spill_nodes = {}
+            self.coalesce_nodes = {}
+            # Pilha de nós para coloração
+            self.node_stack = []
+            # WorkLists
+            self.simplify_worklist = {}
+            self.freeze_worklist = {}
+            self.spill_worklist = {}
+            # Nós move
+            self.coalesce_move_nodes = {}
+            self.constrain_move_nodes = {}
+            self.freeze_move_nodes = {}
+            self.active_move_nodes = {}
+            # Para decidir se vai ter um custo personalizado de spill
+            self.spill_cost = {}
+            # Propriedades referentes à adjacencia
+            self.adjacence_sets = {}
+            self.adjacence_list = {}
+            # Moves
+            self.move_nodes_list = {}
+            # Tabelas de referência a características dos nós(alias, color e degree)
+            self.node_alias_table = {}
+            self.node_color_table = {}
+            self.node_degree_table = {}
+
+            # Criando lista de registradores para temp pré-coloridos
+            for counter in range(len(self.frame.registers())):
+                inst_temp: temp.Temp = self.frame.registers()[counter]
+                node: graph.Node = self.liveness_output.tnode(inst_temp)
+
+                self.pre_colored_nodes.append(node)
+                self.spill_cost[node.to_string()] = sys.maxsize
+
+                self.node_color_table[node.to_string()] = node
+                self.node_degree_table[node.to_string()] = 0
+
+            # Criando lista de registradores para temp não pré-coloridos
+            node_list = self.liveness_output.nodes()
+            while node_list != None:
+                node: graph.Node = node_list.head
+
+                if not node in self.pre_colored_nodes:
+                    self.initial_nodes.append(node)
+                    self.spill_cost[node.to_string()] = 1
+
+                    self.node_degree_table[node.to_string()] = 0
+                
+                node_list = node_list.tail
+
+
+            self.build()
+            self.make_worklist()
+
+            while True:
+                if len(list(self.simplify_worklist.values())) != 0:
+                    self.simplify()
+                elif len(list(self.worklist_move_nodes.values())) != 0:
+                    self.coalesce()
+                elif len(list(self.freeze_worklist.values())) != 0:
+                    self.freeze()
+                elif len(list(self.spill_worklist.values())) != 0:
+                    self.select_spill()
+
+                if not (len(list(self.spill_worklist.values())) != 0 or 
+                len(list(self.freeze_worklist.values())) != 0 or
+                len(list(self.worklist_move_nodes.values())) != 0 or
+                len(list(self.simplify_worklist.values())) != 0):
+                    break
+            
+            self.assing_colors()
+
+            if len(list(self.spill_nodes.values())) != 0:
+                self.rewrite_program()
+                break
+
+
+    def liveness_analysis(self) -> None:
+        # Java: LivenessAnalysis
+        self.assem_flow_graph = flowgraph.AssemFlowGraph(self.instrs)
+        self.liveness_output = Liveness(self.assem_flow_graph)
+
+    def build(self) -> None:
+        pass
+
+    def make_worklist(self) -> None:
+        pass
+
+    def simplify(self) -> None:
+        pass
+
+    def coalesce(self) -> None:
+        pass
+
+    def freeze(self) -> None:
+        pass
+
+    def select_spill(self) -> None:
+        pass
+
+    def assing_colors(self) -> None:
+        pass
+        
+    def rewrite_program(self) -> None:
+        pass
+
     def temp_map(self, temp: temp.Temp) -> str:
         #TODO
         return temp.to_string()

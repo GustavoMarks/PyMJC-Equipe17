@@ -63,7 +63,7 @@
 
 1. Qual é o nome do relator?
 
-    > Gustavo Santos MArques de Freitas
+    > Gustavo Santos Marques de Freitas
 
 2. A etapa foi completamente ou parcialmente concluída?
 
@@ -94,31 +94,32 @@
 
 1. Qual é o nome do relator?
 
-    > Escreva sua resposta aqui
+    > Gustavo Santos Marques de Freitas
 
 2. A etapa foi completamente ou parcialmente concluída?
 
-    > Escreva sua resposta aqui
+    > Parcialmente concluída
 
 3. No caso de parcialmente concluída, o que não foi concluído?
 
-    > Escreva sua resposta aqui
+    > Implementação da classe RegAlloc
 
 4. O programa passa nos testes automatizados?
     
-    > Escreva sua resposta aqui
+    > Não houve testes
 
 5. Algum erro de execução foi encontrado para alguma das entradas? Quais?
     
-    > Escreva sua resposta aqui
+    > Não houve testes
 
 6. Quais as dificuldades encontradas para realização da etapa do projeto?
     
-    > Escreva sua resposta aqui
+    > Domínio de POO para a linguagem python, complexidade do projeto
 
 7. Qual a participação de cada membro da equipe na etapa de execução?
     
-    > Escreva sua resposta aqui
+    > Trabalho feito individualmente
+
 
 
 # 5º Relatóio: Etapa AI-e (Alocação de Registradores)
